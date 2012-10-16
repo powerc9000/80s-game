@@ -4,7 +4,6 @@ var pac_man, grid, red_ghost, blue_ghost, pink_ghost, yellow_ghost, ghost;
 //0 un accesable
 //1 accesable
 map = [
-//   0 1 2 3 4 5 6 7 8 9 10111213151617181920
 	[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],//0
 	[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
 	[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],//1
@@ -90,7 +89,9 @@ addEventListener("keydown", function (e) {
 }, false);
 
 addEventListener("keyup", function (e) {
-	delete keysDown[e.keyCode];
+	setTimeout(function(){
+		delete keysDown[e.keyCode];
+	}, 100)
 }, false);
 headOn.update = function(){
 	moveRedGhost();
@@ -125,29 +126,73 @@ function movePacMan(){
 	if (38 in keysDown) { 
 		next_tile = nextTile(tile.x, tile.y ,0)
 		type = typeOfTile(next_tile)
-		if(type){
-			pac_man.direction = 0;
+		if(inCenterOfTile(pac_man, tile) || pac_man.direction === 2){
+			if(type){
+				pac_man.direction = 0;
+			}
 		}
+		else{
+			if(closeEnough(pac_man, tile)){
+				if(type){
+					pac_man.next_direction = 0;
+				}
+			}
+		}
+
 	}
 	if (40 in keysDown) { 
 		next_tile = nextTile(tile.x, tile.y ,2)
 		type = typeOfTile(next_tile)
-		if(type){
-			pac_man.direction = 2;
+		if(inCenterOfTile(pac_man, tile) || pac_man.direction === 0){
+			if(type){
+				pac_man.direction = 2;
+			}
+		}
+		else{
+			if(closeEnough(pac_man, tile)){
+				if(type){
+					pac_man.next_direction = 2;
+				}
+			}
 		}
 	}
 	if (37 in keysDown) { 
 		next_tile = nextTile(tile.x, tile.y ,1)
 		type = typeOfTile(next_tile)
-		if(type){
-			pac_man.direction = 1;
+		if(inCenterOfTile(pac_man, tile) || pac_man.direction === 3){
+			if(type){
+				pac_man.direction = 1;
+			}
 		}
+		else{
+			if(closeEnough(pac_man, tile)){
+				if(type){
+					pac_man.next_direction = 1;
+				}
+			}
+		}
+		
 	}
 	if (39 in keysDown) { 
 		next_tile = nextTile(tile.x, tile.y ,3)
 		type = typeOfTile(next_tile)
-		if(type){
-			pac_man.direction = 3;
+		if(inCenterOfTile(pac_man, tile)|| pac_man.direction === 1){
+			if(type){
+				pac_man.direction = 3;
+			}
+		}
+		else{
+			if(closeEnough(pac_man, tile)){
+				if(type){
+					pac_man.next_direction = 3;
+				}
+			}
+		}
+	}
+	if(inCenterOfTile(pac_man, tile)){
+		if(pac_man.next_direction){
+			pac_man.direction = pac_man.next_direction;
+			pac_man.next_direction = false;
 		}
 	}
 	if(typeOfTile(nextTile(tile.x, tile.y, pac_man.direction))){
@@ -163,13 +208,14 @@ function movePacMan(){
 			pac_man.y += velocity(20, pac_man.direction, "y") * (headOn.fps/1000);
 		}
 	}
-	tile = getTile(pac_man.x, pac_man.y);
-	if(pac_man.direction === 0 || pac_man.direction === 2){
-		pac_man.x = tile.x * 16 +8
-	}
-	else{
-		pac_man.y = tile.y * 16 + 8
-	}
+	// tile = getTile(pac_man.x, pac_man.y);
+	// if(pac_man.direction === 0 || pac_man.direction === 2){
+		
+	// 	pac_man.x = tile.x * 16 +8
+	// }
+	// else{
+	// 	pac_man.y = tile.y * 16 + 8
+	// }
 }
 function moveRedGhost(){
 	var current_tile = getTile(red_ghost.x, red_ghost.y),
@@ -346,6 +392,13 @@ function inCenterOfTile(obj,tile){
 		}
 	}
 }
+function closeEnough(obj, tile){
+	if(obj.x >= tile.x * 16 + 3 && obj.x <= tile.x * 16 + 13){
+		if(obj.y >= tile.y * 16 + 3 && obj.y <= tile.y * 16 + 13){
+			return true;
+		}
+	}
+}
 function redTargetTile(){
 	var mode = gamestate.mode;
 	if(!red_ghost.frightend){
@@ -379,6 +432,7 @@ function pinkTargetTile(){
 		}
 	}
 }
+
 function nextTile(x, y, facing){
 	
 	switch(facing){
