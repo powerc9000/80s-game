@@ -1,5 +1,7 @@
-headOn.canvas(224*2,288*2)
-var pac_man, grid, red_ghost, blue_ghost, pink_ghost, yellow_ghost, ghost;
+headOn.canvas.create("main",224*2,288*2);
+
+var pac_man, grid, red_ghost, blue_ghost, pink_ghost, yellow_ghost, ghost, canvas = headOn.canvas("main");
+canvas.append("body")
 //types of tiles
 //0 un accesable
 //1 accesable
@@ -156,25 +158,27 @@ headOn.render = function(){
 	for(i=0;i<map[0].length;i++){
 		for(j=0;j<map.length;j++){
 			if(map[j][i]===0){
-				headOn.drawRect(16,16, i*16, j*16, "black");
+				canvas.drawRect(16,16, i*16, j*16, "black", {color:"blue", width:1});
 			}
 			else{
-				headOn.drawRect(16,16, i*16, j*16, "blue");
+				canvas.drawRect(16,16, i*16, j*16, "blue", {color:"black", width:1});
 			}
 		}
 	}
 	for(i=0; i<dots[0].length;i++){
 		for(j=0;j<dots.length;j++){
 			if(dots[j][i]){
-				headOn.drawRect(2, 2, i*16 + 8, j*16 + 8, "yellow");
+				canvas.drawRect(2, 2, i*16 + 8, j*16 + 8, "yellow");
 			}
 		}
 	}
 	var current_tile = getTile(red_ghost.x, red_ghost.y)
-	headOn.drawImage( headOn.images["red_ghost"], red_ghost.x - (17/2), red_ghost.y - (17/2))
-	headOn.drawImage( headOn.images["pink_ghost"], pink_ghost.x - (17/2), pink_ghost.y - (17/2))
-	headOn.drawImage( headOn.images["orange_ghost"], orange_ghost.x - (17/2), orange_ghost.y - (17/2))
-	headOn.drawRect(16,16, pac_man.x - (16/2), pac_man.y - (16/2), "yellow")
+	canvas.drawImage( headOn.images["red_ghost"], red_ghost.x - (17/2), red_ghost.y - (17/2));
+	canvas.drawImage( headOn.images["pink_ghost"], pink_ghost.x - (17/2), pink_ghost.y - (17/2));
+	canvas.drawImage( headOn.images["orange_ghost"], orange_ghost.x - (17/2), orange_ghost.y - (17/2));
+	console.log(red_ghost)
+	canvas.drawRect(16,16, red_ghost.next_tile.x*16, red_ghost.next_tile.y*16, "red")
+	canvas.drawRect(16,16, pac_man.x - (16/2), pac_man.y - (16/2), "yellow");
 }
 headOn.run();
 function movePacMan(){
@@ -347,7 +351,6 @@ function moveRedGhost(){
 					y:0
 				}
 			}
-			console.log("multi")
 			passableTiles.forEach(function(t, i){
 				var distance = distanceTo({x:tile.x + directions[t].x, y:tile.y + directions[t].y}, target_tile);
 				if(i === 0 || distance <= previous_distance){
@@ -422,7 +425,6 @@ function movePinkGhost(){
 				passableTiles.push(d[i]);
 			}
 		})
-		console.log(passableTiles)
 		if(passableTiles.length > 1){
 			directions = {
 				0:{
