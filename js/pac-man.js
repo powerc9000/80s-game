@@ -147,10 +147,11 @@ addEventListener("keyup", function (e) {
 	}, 100)
 }, false);
 headOn.update = function(){
+	movePacMan();
 	moveRedGhost();
 	movePinkGhost();
 	moveOrangeGhost();
-	movePacMan();
+	
 	checkCollisions();
 
 }
