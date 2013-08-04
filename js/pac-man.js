@@ -86,7 +86,6 @@ dots = [
 ghost = {
 		frightend:0,
 		next_tile: {},
-		_img:"",
 		image: function(){
 			if(this.frightend){
 				
@@ -96,6 +95,8 @@ ghost = {
 				return headOn.images(this.ghost_name);
 			}
 		},
+		move:moveGhost,
+		targetTile:targetTile
 	}
 	red_ghost = headOn.entity({
 		x:88,
@@ -135,7 +136,7 @@ ghost = {
 		}
 	},ghost);
 	
-headOn.loadImages({name:"red_ghost", src:"img/red_ghost.png"},{name:"pink_ghost", src:"img/pink_ghost.png"},{name:"orange_ghost", src:"img/orange_ghost.png"}, {name:"frightend", src:"img/frightend.png"}, init);
+headOn.loadImages([{name:"red_ghost", src:"img/red_ghost.png"},{name:"pink_ghost", src:"img/pink_ghost.png"},{name:"orange_ghost", src:"img/orange_ghost.png"}, {name:"frightend", src:"img/frightend.png"}]);
 
 pac_man = {
 	x: 184,
@@ -163,9 +164,9 @@ addEventListener("keyup", function (e) {
 }, false);
 headOn.update = function(){
 	movePacMan();
-	moveRedGhost();
-	movePinkGhost();
-	moveOrangeGhost();
+	red_ghost.move();
+	pink_ghost.move();
+	orange_ghost.move();
 	
 	checkCollisions();
 
@@ -193,11 +194,9 @@ headOn.render = function(){
 			}
 		}
 	}
-	var current_tile = getTile(red_ghost.x, red_ghost.y)
 	canvas.drawImage( red_ghost.image(), red_ghost.x - (17/2), red_ghost.y - (17/2));
 	canvas.drawImage( pink_ghost.image(), pink_ghost.x - (17/2), pink_ghost.y - (17/2));
 	canvas.drawImage( orange_ghost.image(), orange_ghost.x - (17/2), orange_ghost.y - (17/2));
-	canvas.drawRect(16,16, red_ghost.next_tile.x*16, red_ghost.next_tile.y*16, "red")
 	canvas.drawRect(16,16, pac_man.x - (16/2), pac_man.y - (16/2), "yellow");
 }
 headOn.run();
@@ -312,8 +311,9 @@ function movePacMan(){
 	// 	pac_man.y = tile.y * 16 + 8
 	// }
 }
-function moveRedGhost(){
-	var current_tile = getTile(red_ghost.x, red_ghost.y),
+function moveGhost(ghost){
+	var current_tile = getTile(this.x, this.y),
+	that = this,
 	tile,
 	adjTiles,
 	passableTiles,
@@ -337,17 +337,17 @@ function moveRedGhost(){
 		3: 1,
 	};
 
-	if(current_tile.x === red_ghost.next_tile.x && current_tile.y === red_ghost.next_tile.y && inCenterOfTile(red_ghost, red_ghost.next_tile)){
-		tile = nextTile(current_tile.x, current_tile.y, red_ghost.next_tile.direction);
+	if(current_tile.x === this.next_tile.x && current_tile.y === this.next_tile.y && inCenterOfTile(this, this.next_tile)){
+		tile = nextTile(current_tile.x, current_tile.y, this.next_tile.direction);
 		var adjTiles = adjacentTiles(tile);
 		var passableTiles = [];
-		red_ghost.direction = red_ghost.next_tile.direction;
-		target_tile = targetTile("red");
-		red_ghost.next_tile.x = tile.x;
-		red_ghost.next_tile.y = tile.y;
+		this.direction = this.next_tile.direction;
+		target_tile = this.targetTile();
+		this.next_tile.x = tile.x;
+		this.next_tile.y = tile.y;
 		
 		adjTiles.forEach(function(t, i){
-			if(t && opposites[d[i]] !== red_ghost.next_tile.direction){
+			if(t && opposites[d[i]] !== that.next_tile.direction){
 				passableTiles.push(d[i]);
 			}
 		})
@@ -371,12 +371,12 @@ function moveRedGhost(){
 				}
 			}
 			
-			if(!red_ghost.frightend){
+			if(!this.frightend){
 				passableTiles.forEach(function(t, i){
 					var distance = distanceTo({x:tile.x + directions[t].x, y:tile.y + directions[t].y}, target_tile);
 					if(i === 0 || distance <= previous_distance){
 						previous_distance = distance;
-						red_ghost.next_tile.direction = t;
+						that.next_tile.direction = t;
 					}
 				
 				})
@@ -384,240 +384,47 @@ function moveRedGhost(){
 			else{
 				var max = passableTiles.length && passableTiles.length-1;
 				randD = headOn.randInt(0, max);
-				red_ghost.next_tile.direction = passableTiles[randD];
+				this.next_tile.direction = passableTiles[randD];
 			}
 		}
-		// else if( passableTiles[0] !== red_ghost.next_tile.direction){
+		// else if( passableTiles[0] !== this.next_tile.direction){
 			
 		// }
 		else{
 			console.log(passableTiles)
-			red_ghost.next_tile.direction = passableTiles[0]
-			//red_ghost.next_tile.direction = red_ghost.direction;
+			this.next_tile.direction = passableTiles[0]
+			//this.next_tile.direction = this.direction;
 		}
 	}
 	
 	
-	red_ghost.x += velocity(21, red_ghost.direction, "x") * (headOn.fps/1000);
-	red_ghost.y += velocity(21, red_ghost.direction, "y") * (headOn.fps/1000);
+	this.x += velocity(21, this.direction, "x") * (headOn.fps/1000);
+	this.y += velocity(21, this.direction, "y") * (headOn.fps/1000);
 
-	tile = getTile(red_ghost.x, red_ghost.y)
-	if(tile.x === 0 && tile.y === 17 && inCenterOfTile(red_ghost, tile) && red_ghost.direction === 1){
+	tile = getTile(this.x, this.y)
+	if(tile.x === 0 && tile.y === 17 && inCenterOfTile(this, tile) && this.direction === 1){
 		next_tile = nextTile(27, 17, 1);
-		red_ghost.next_tile.direction = 1
-		red_ghost.x = 27 * 16 +8;
-		red_ghost.next_tile.x = next_tile.x
+		this.next_tile.direction = 1
+		this.x = 27 * 16 +8;
+		this.next_tile.x = next_tile.x
 	}
-	else if(tile.x === 27 && tile.y === 17 && inCenterOfTile(red_ghost, tile) && red_ghost.direction === 3){
+	else if(tile.x === 27 && tile.y === 17 && inCenterOfTile(this, tile) && this.direction === 3){
 		next_tile = nextTile(0, 17, 3);
-		red_ghost.next_tile.direction = 3
-		red_ghost.x = 0 * 16 + 8;
-		red_ghost.next_tile.x = next_tile.x;
+		this.next_tile.direction = 3
+		this.x = 0 * 16 + 8;
+		this.next_tile.x = next_tile.x;
 	}
 }
-function movePinkGhost(){
-	var current_tile = getTile(pink_ghost.x, pink_ghost.y),
-	tile,
-	adjTiles,
-	passableTiles,
-	target_tile,
-	directions,
-	previous_distance,
-	d ={
-		0:3,
-		3:0,
-		1:2,
-		2:1
-	},
-	opposites = {
-		up:2,
-		right:1,
-		down:0,
-		left:3,
-		0: 2,
-		1: 3,
-		2: 0,
-		3: 1,
-	};
-	if(current_tile.x === pink_ghost.next_tile.x && current_tile.y === pink_ghost.next_tile.y && inCenterOfTile(pink_ghost, pink_ghost.next_tile)){
-		tile = nextTile(current_tile.x, current_tile.y, pink_ghost.next_tile.direction);
-		adjTiles = adjacentTiles(tile);
-		passableTiles = [];
-		target_tile = targetTile("pink");
-		
-		pink_ghost.direction = pink_ghost.next_tile.direction;
-		pink_ghost.next_tile.x = tile.x;
-		pink_ghost.next_tile.y = tile.y;
-		adjTiles.forEach(function(t, i){
-			if(t && opposites[d[i]] !== pink_ghost.next_tile.direction){
-				passableTiles.push(d[i]);
-			}
-		})
-		if(passableTiles.length > 1){
-			directions = {
-				0:{
-					x:0,
-					y: -1
-				},
-				2:{
-					x:0,
-					y:1
-				},
-				1:{
-					x:-1,
-					y:0
-				},
-				3:{
-					x:1,
-					y:0
-				}
-			}
-			console.log("multi")
-			passableTiles.forEach(function(t, i){
-				console.log(t)
-				var distance = distanceTo({x:tile.x + directions[t].x, y:tile.y + directions[t].y}, target_tile);
-				if(i === 0 || distance <= previous_distance){
-					previous_distance = distance;
-					pink_ghost.next_tile.direction = t;
-				}
-			
-			})
-		}
-		else if( passableTiles[0] !== pink_ghost.next_tile.direction){
-			console.log("here")
-			pink_ghost.next_tile.direction = passableTiles[0]
-		}
-		else{
-			pink_ghost.next_tile.direction = pink_ghost.direction;
-		}
-	}
-	pink_ghost.x += velocity(18, pink_ghost.direction, "x") * (headOn.fps/1000);
-	pink_ghost.y += velocity(18, pink_ghost.direction, "y") * (headOn.fps/1000);
 
-	tile = getTile(pink_ghost.x, pink_ghost.y)
-	if(tile.x === 0 && tile.y === 17 && inCenterOfTile(pink_ghost, tile) && pink_ghost.direction === 1){
-		next_tile = nextTile(27, 17, pink_ghost.direction);
-		pink_ghost.next_tile.direction = pink_ghost.direction;
-		pink_ghost.x = 27 * 16 +8;
-		pink_ghost.next_tile.x = next_tile.x
-	}
-	if(tile.x === 27 && tile.y === 17 && inCenterOfTile(pink_ghost, tile) && pink_ghost.direction === 3){
-		next_tile = nextTile(0, 17, pink_ghost.direction);
-		pink_ghost.next_tile.direction = pink_ghost.direction;
-		pink_ghost.x = 0 * 16 + 8;
-		pink_ghost.next_tile.x = next_tile.x;
-	}
-	
-}
-function moveOrangeGhost(){
-	var current_tile = getTile(orange_ghost.x, orange_ghost.y),
-	tile,
-	adjTiles,
-	passableTiles,
-	target_tile,
-	directions,
-	previous_distance,
-	randD,
-	d ={
-		0:3,
-		3:0,
-		1:2,
-		2:1
-	},
-	opposites = {
-		up:2,
-		right:1,
-		down:0,
-		left:3,
-		0: 2,
-		1: 3,
-		2: 0,
-		3: 1,
-	};
-	if(current_tile.x === orange_ghost.next_tile.x && current_tile.y === orange_ghost.next_tile.y && inCenterOfTile(orange_ghost, orange_ghost.next_tile)){
-		tile = nextTile(current_tile.x, current_tile.y, orange_ghost.next_tile.direction);
-		adjTiles = adjacentTiles(tile);
-		passableTiles = [];
-		target_tile = targetTile("orange");
-		
-		orange_ghost.direction = orange_ghost.next_tile.direction;
-		orange_ghost.next_tile.x = tile.x;
-		orange_ghost.next_tile.y = tile.y;
-		adjTiles.forEach(function(t, i){
-			if(t && opposites[d[i]] !== orange_ghost.next_tile.direction){
-				passableTiles.push(d[i]);
-			}
-		})
-		if(passableTiles.length > 1){
-			directions = {
-				0:{
-					x:0,
-					y: -1
-				},
-				2:{
-					x:0,
-					y:1
-				},
-				1:{
-					x:-1,
-					y:0
-				},
-				3:{
-					x:1,
-					y:0
-				}
-			}
-			if(!orange_ghost.frightend){
-				passableTiles.forEach(function(t, i){
-					var distance = distanceTo({x:tile.x + directions[t].x, y:tile.y + directions[t].y}, target_tile);
-					if(i === 0 || distance <= previous_distance){
-						previous_distance = distance;
-						orange_ghost.next_tile.direction = t;
-					}
-				})
-			}
-			else{
-				var max = passableTiles.length && passableTiles.length-1;
-				randD = headOn.randInt(0, max);
-				orange_ghost.next_tile.direction = passableTiles[randD];
-			}
-			
-		}
-		else if( passableTiles[0] !== orange_ghost.next_tile.direction){
-			orange_ghost.next_tile.direction = passableTiles[0]
-		}
-		else{
-			orange_ghost.next_tile.direction = orange_ghost.direction;
-		}
-	}
-	orange_ghost.x += velocity(21, orange_ghost.direction, "x") * (headOn.fps/1000);
-	orange_ghost.y += velocity(21, orange_ghost.direction, "y") * (headOn.fps/1000);
-
-	tile = getTile(orange_ghost.x, orange_ghost.y)
-	if(tile.x === 0 && tile.y === 17 && inCenterOfTile(orange_ghost, tile) && orange_ghost.direction === 1){
-		next_tile = nextTile(27, 17, orange_ghost.direction);
-		orange_ghost.next_tile.direction = orange_ghost.direction;
-		orange_ghost.x = 27 * 16 +8;
-		orange_ghost.next_tile.x = next_tile.x
-	}
-	if(tile.x === 27 && tile.y === 17 && inCenterOfTile(orange_ghost, tile) && orange_ghost.direction === 3){
-		next_tile = nextTile(0, 17, orange_ghost.direction);
-		orange_ghost.next_tile.direction = orange_ghost.direction;
-		orange_ghost.x = 0 * 16 + 8;
-		orange_ghost.next_tile.x = next_tile.x;
-	}
-	
-
-}
 function targetTile(ghost){
-	switch(ghost){
-		case "red":
+	switch(this.ghost_name){
+		case "red_ghost":
 			return redTargetTile();
-		case "pink":
+		case "pink_ghost":
 			return pinkTargetTile();
-		case "blue":
+		case "blue_ghost":
 			return blueTargetTile();
-		case "orange":
+		case "orange_ghost":
 			return orangeTargetTile();
 	}
 }
