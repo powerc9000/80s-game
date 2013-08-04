@@ -51,7 +51,7 @@ dots = [
 	[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
 	[0,1,1,1,1,1,1,1,1,1,1,1,1,0,0,1,1,1,1,1,1,1,1,1,1,1,1,0],//3
 	[0,1,0,0,0,0,1,0,0,0,0,0,1,0,0,1,0,0,0,0,0,1,0,0,0,0,1,0],//4
-	[0,1,0,0,0,0,1,0,0,0,0,0,1,0,0,1,0,0,0,0,0,1,0,0,0,0,1,0],//5
+	[0,2,0,0,0,0,1,0,0,0,0,0,1,0,0,1,0,0,0,0,0,1,0,0,0,0,2,0],//5
 	[0,1,0,0,0,0,1,0,0,0,0,0,1,0,0,1,0,0,0,0,0,1,0,0,0,0,1,0],//6
 	[0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0],//7
 	[0,1,0,0,0,0,1,0,0,1,0,0,0,0,0,0,0,0,1,0,0,1,0,0,0,0,1,0],//8
@@ -71,7 +71,7 @@ dots = [
 	[0,1,1,1,1,1,1,1,1,1,1,1,1,0,0,1,1,1,1,1,1,1,1,1,1,1,1,0],//22
 	[0,1,0,0,0,0,1,0,0,0,0,0,1,0,0,1,0,0,0,0,0,1,0,0,0,0,1,0],//23
 	[0,1,0,0,0,0,1,0,0,0,0,0,1,0,0,1,0,0,0,0,0,1,0,0,0,0,1,0],//24
-	[0,1,1,1,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,1,1,1,0],//25
+	[0,2,1,1,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,1,1,2,0],//25
 	[0,0,0,1,0,0,1,0,0,1,0,0,0,0,0,0,0,0,1,0,0,1,0,0,1,0,0,0],//26
 	[0,0,0,1,0,0,1,0,0,1,0,0,0,0,0,0,0,0,1,0,0,1,0,0,1,0,0,0],
 	[0,1,1,1,1,1,1,0,0,1,1,1,1,0,0,1,1,1,1,0,0,1,1,1,1,1,1,0],//28
@@ -84,44 +84,59 @@ dots = [
 
 ];
 ghost = {
-	frightend:0,
-	next_tile: {},
-}
-red_ghost = headOn.entity({
-	x:88,
-	y:72,
-	direction: 1,
-	next_direction:1,
-	current_tile:{x:1, y:0},
-	next_tile: {
-		direction:1,
-		x:4,
-		y:4
+		frightend:0,
+		next_tile: {},
+		_img:"",
+		image: function(){
+			if(this.frightend){
+				
+				return headOn.images("frightend");
+			}
+			else{
+				return headOn.images(this.ghost_name);
+			}
+		},
 	}
-},ghost);
-pink_ghost = headOn.entity({
-	x:72,
-	y:72,
-	direction: 1,
-	current_tile:{x:1, y:0},
-	next_tile: {
-		direction:1,
-		x:3,
-		y:4
-	}
-},ghost);
-orange_ghost = headOn.entity({
-	x:56,
-	y:72,
-	direction: 1,
-	current_tile:{x:1, y:0},
-	next_tile: {
-		direction:1,
-		x:2,
-		y:4
-	}
-},ghost);
-headOn.loadImages({name:"red_ghost", src:"img/red_ghost.png"},{name:"pink_ghost", src:"img/pink_ghost.png"},{name:"orange_ghost", src:"img/orange_ghost.png"})
+	red_ghost = headOn.entity({
+		x:88,
+		y:72,
+		direction: 1,
+		next_direction:1,
+		ghost_name:"red_ghost",
+		current_tile:{x:1, y:0},
+		next_tile: {
+			direction:1,
+			x:4,
+			y:4
+		}
+	},ghost);
+	pink_ghost = headOn.entity({
+		x:72,
+		y:72,
+		direction: 1,
+		ghost_name:"pink_ghost",
+		current_tile:{x:1, y:0},
+		next_tile: {
+			direction:1,
+			x:3,
+			y:4
+		}
+	},ghost);
+	orange_ghost = headOn.entity({
+		x:56,
+		y:72,
+		direction: 1,
+		ghost_name:"orange_ghost",
+		current_tile:{x:1, y:0},
+		next_tile: {
+			direction:1,
+			x:2,
+			y:4
+		}
+	},ghost);
+	
+headOn.loadImages({name:"red_ghost", src:"img/red_ghost.png"},{name:"pink_ghost", src:"img/pink_ghost.png"},{name:"orange_ghost", src:"img/orange_ghost.png"}, {name:"frightend", src:"img/frightend.png"}, init);
+
 pac_man = {
 	x: 184,
 	y: 376,
@@ -169,15 +184,19 @@ headOn.render = function(){
 	for(i=0; i<dots[0].length;i++){
 		for(j=0;j<dots.length;j++){
 			if(dots[j][i]){
-				canvas.drawRect(2, 2, i*16 + 8, j*16 + 8, "yellow");
+				if(dots[j][i] === 1){
+					canvas.drawCircle(i*16 + 8, j*16 + 8, 1, "yellow");
+				}
+				else{
+					canvas.drawCircle(i*16 + 8, j*16 + 8, 2.5,"yellow");
+				}
 			}
 		}
 	}
 	var current_tile = getTile(red_ghost.x, red_ghost.y)
-	canvas.drawImage( headOn.images["red_ghost"], red_ghost.x - (17/2), red_ghost.y - (17/2));
-	canvas.drawImage( headOn.images["pink_ghost"], pink_ghost.x - (17/2), pink_ghost.y - (17/2));
-	canvas.drawImage( headOn.images["orange_ghost"], orange_ghost.x - (17/2), orange_ghost.y - (17/2));
-	console.log(red_ghost)
+	canvas.drawImage( red_ghost.image(), red_ghost.x - (17/2), red_ghost.y - (17/2));
+	canvas.drawImage( pink_ghost.image(), pink_ghost.x - (17/2), pink_ghost.y - (17/2));
+	canvas.drawImage( orange_ghost.image(), orange_ghost.x - (17/2), orange_ghost.y - (17/2));
 	canvas.drawRect(16,16, red_ghost.next_tile.x*16, red_ghost.next_tile.y*16, "red")
 	canvas.drawRect(16,16, pac_man.x - (16/2), pac_man.y - (16/2), "yellow");
 }
@@ -320,7 +339,6 @@ function moveRedGhost(){
 
 	if(current_tile.x === red_ghost.next_tile.x && current_tile.y === red_ghost.next_tile.y && inCenterOfTile(red_ghost, red_ghost.next_tile)){
 		tile = nextTile(current_tile.x, current_tile.y, red_ghost.next_tile.direction);
-		console.log(red_ghost.next_tile.direction);
 		var adjTiles = adjacentTiles(tile);
 		var passableTiles = [];
 		red_ghost.direction = red_ghost.next_tile.direction;
@@ -352,21 +370,30 @@ function moveRedGhost(){
 					y:0
 				}
 			}
-			passableTiles.forEach(function(t, i){
-				var distance = distanceTo({x:tile.x + directions[t].x, y:tile.y + directions[t].y}, target_tile);
-				if(i === 0 || distance <= previous_distance){
-					previous_distance = distance;
-					red_ghost.next_tile.direction = t;
-				}
 			
-			})
+			if(!red_ghost.frightend){
+				passableTiles.forEach(function(t, i){
+					var distance = distanceTo({x:tile.x + directions[t].x, y:tile.y + directions[t].y}, target_tile);
+					if(i === 0 || distance <= previous_distance){
+						previous_distance = distance;
+						red_ghost.next_tile.direction = t;
+					}
+				
+				})
+			}
+			else{
+				var max = passableTiles.length && passableTiles.length-1;
+				randD = headOn.randInt(0, max);
+				red_ghost.next_tile.direction = passableTiles[randD];
+			}
 		}
-		else if( passableTiles[0] !== red_ghost.next_tile.direction){
-			console.log("here")
-			red_ghost.next_tile.direction = passableTiles[0]
-		}
+		// else if( passableTiles[0] !== red_ghost.next_tile.direction){
+			
+		// }
 		else{
-			red_ghost.next_tile.direction = red_ghost.direction;
+			console.log(passableTiles)
+			red_ghost.next_tile.direction = passableTiles[0]
+			//red_ghost.next_tile.direction = red_ghost.direction;
 		}
 	}
 	
@@ -490,6 +517,7 @@ function moveOrangeGhost(){
 	target_tile,
 	directions,
 	previous_distance,
+	randD,
 	d ={
 		0:3,
 		3:0,
@@ -520,7 +548,6 @@ function moveOrangeGhost(){
 				passableTiles.push(d[i]);
 			}
 		})
-		console.log(passableTiles)
 		if(passableTiles.length > 1){
 			directions = {
 				0:{
@@ -540,19 +567,23 @@ function moveOrangeGhost(){
 					y:0
 				}
 			}
-			console.log("multi")
-			passableTiles.forEach(function(t, i){
-				console.log(t)
-				var distance = distanceTo({x:tile.x + directions[t].x, y:tile.y + directions[t].y}, target_tile);
-				if(i === 0 || distance <= previous_distance){
-					previous_distance = distance;
-					orange_ghost.next_tile.direction = t;
-				}
+			if(!orange_ghost.frightend){
+				passableTiles.forEach(function(t, i){
+					var distance = distanceTo({x:tile.x + directions[t].x, y:tile.y + directions[t].y}, target_tile);
+					if(i === 0 || distance <= previous_distance){
+						previous_distance = distance;
+						orange_ghost.next_tile.direction = t;
+					}
+				})
+			}
+			else{
+				var max = passableTiles.length && passableTiles.length-1;
+				randD = headOn.randInt(0, max);
+				orange_ghost.next_tile.direction = passableTiles[randD];
+			}
 			
-			})
 		}
 		else if( passableTiles[0] !== orange_ghost.next_tile.direction){
-			console.log("here")
 			orange_ghost.next_tile.direction = passableTiles[0]
 		}
 		else{
@@ -615,13 +646,17 @@ function redTargetTile(){
 			return {x:2, y:28}
 		}
 	}
+	else{
+		console.log("yes it is")
+		return {x:2, y:28}
+	}
 
 }
 function orangeTargetTile(){
 	var mode = gamestate.mode;
 	var pac_man_tile = getTile(pac_man.x, pac_man.y);
 	var orange_ghost_tile = getTile(orange_ghost.x, orange_ghost.y);
-	if(!red_ghost.frightend){
+	if(!orange_ghost.frightend){
 		if(mode === 0){
 			if(distanceTo(pac_man_tile, orange_ghost_tile) > 8){
 				return pac_man_tile;
@@ -634,11 +669,15 @@ function orangeTargetTile(){
 			return {x:2, y:28}
 		}
 	}
+	else{
+		return {x:2, y:28}
+	}
+
 }
 function pinkTargetTile(){
 	var mode = gamestate.mode,
 	tile = getTile(pac_man.x, pac_man.y);
-	if(!red_ghost.frightend){
+	if(!pink_ghost.frightend){
 		if(mode === 0){
 			switch(pac_man.direction){
 				case 0:
@@ -655,6 +694,9 @@ function pinkTargetTile(){
 			return {x:2, y:28}
 		}
 	}
+	else{
+		return {x:2, y:28}
+	}
 }
 
 function nextTile(x, y, facing){
@@ -668,6 +710,8 @@ function nextTile(x, y, facing){
 			return {y:y+1, x:x}
 		case 3:
 			return {y:y, x:x+1};
+		default:
+			console.log("hut")
 	}
 }
 function adjacentTiles(tile){
@@ -734,6 +778,26 @@ function checkCollisions(){
 	})
 	var tile = getTile(pac_man.x, pac_man.y);
 	if(dots[tile.y][tile.x]){
+		if(dots[tile.y][tile.x] === 2){
+			frightend();
+		}
 		dots[tile.y][tile.x] = 0;
+		
 	}
+}
+
+function frightend(){
+	console.log("ran")
+	red_ghost.frightend = true;
+	pink_ghost.frightend = true;
+	orange_ghost.frightend = true;
+	setTimeout(function(){
+		red_ghost.frightend = false;
+		pink_ghost.frightend = false;
+		orange_ghost.frightend = false;
+	},8*1000)
+}
+function init(){
+
+	
 }
