@@ -1,7 +1,9 @@
-headOn.canvas.create("main",224*2,288*2);
+var camera = new headOn.Camera(224*2, 288*2);
+headOn.canvas.create("main",224*2,288*2, camera);
 
 var pac_man, grid, red_ghost, blue_ghost, pink_ghost, yellow_ghost, ghost, canvas = headOn.canvas("main");
-canvas.append("body")
+canvas.append("body");
+
 //types of tiles
 //0 un accesable
 //1 accesable
@@ -143,9 +145,10 @@ pac_man = {
 	y: 376,
 	tilex: 0,
 	tiley: 0,
-	speed: 10,
+	speed:50,
 	//up: 0 left:1 down: 2 right:3
-	direction: 2
+	direction: 2,
+
 };
 gamestate = {
 	// 0 chase 1 scatter
@@ -162,16 +165,17 @@ addEventListener("keyup", function (e) {
 		delete keysDown[e.keyCode];
 	}, 100)
 }, false);
-headOn.update = function(){
-	movePacMan();
+headOn.update(function(delta){
+	delta = delta/1000;
+	movePacMan(delta);
 	red_ghost.move();
 	pink_ghost.move();
 	orange_ghost.move();
 	
 	checkCollisions();
 
-}
-headOn.render = function(){
+});
+headOn.render(function(){
 	for(i=0;i<map[0].length;i++){
 		for(j=0;j<map.length;j++){
 			if(map[j][i]===0){
@@ -198,9 +202,9 @@ headOn.render = function(){
 	canvas.drawImage( pink_ghost.image(), pink_ghost.x - (17/2), pink_ghost.y - (17/2));
 	canvas.drawImage( orange_ghost.image(), orange_ghost.x - (17/2), orange_ghost.y - (17/2));
 	canvas.drawRect(16,16, pac_man.x - (16/2), pac_man.y - (16/2), "yellow");
-}
+})
 headOn.run();
-function movePacMan(){
+function movePacMan(delta){
 	var tile = getTile(pac_man.x, pac_man.y);
 	var next_tile;
 	var type;
@@ -282,8 +286,8 @@ function movePacMan(){
 	}
 	if(typeOfTile(nextTile(tile.x, tile.y, pac_man.direction))){
 
-			pac_man.x += velocity(20, pac_man.direction, "x") * (headOn.fps/1000);
-			pac_man.y += velocity(20, pac_man.direction, "y") * (headOn.fps/1000);
+			pac_man.x += velocity(pac_man.speed, pac_man.direction, "x") * delta;
+			pac_man.y += velocity(pac_man.speed, pac_man.direction, "y") * delta;
 		
 		
 	}
@@ -294,7 +298,6 @@ function movePacMan(){
 		}
 	}
 	if(tile.x === 0 && tile.y === 17 && inCenterOfTile(pac_man, tile) && pac_man.direction === 1){
-		console.log("hit!")
 		pac_man.x = 27 * 16 +8;
 		pac_man.y = 17 * 16 +8;
 	}
@@ -391,7 +394,6 @@ function moveGhost(ghost){
 			
 		// }
 		else{
-			console.log(passableTiles)
 			this.next_tile.direction = passableTiles[0]
 			//this.next_tile.direction = this.direction;
 		}
@@ -454,7 +456,6 @@ function redTargetTile(){
 		}
 	}
 	else{
-		console.log("yes it is")
 		return {x:2, y:28}
 	}
 
@@ -594,7 +595,6 @@ function checkCollisions(){
 }
 
 function frightend(){
-	console.log("ran")
 	red_ghost.frightend = true;
 	pink_ghost.frightend = true;
 	orange_ghost.frightend = true;
