@@ -1,5 +1,6 @@
-var camera = new headOn.Camera(224*2, 288*2);
-headOn.canvas.create("main",224*2,288*2, camera);
+var tileScale = 3;
+var camera = new headOn.Camera(224*tileScale, 288*tileScale);
+headOn.canvas.create("main",224*tileScale,288*tileScale, camera);
 
 var pac_man, grid, red_ghost, blue_ghost, pink_ghost, yellow_ghost, ghost, canvas = headOn.canvas("main");
 canvas.append("body");
@@ -141,13 +142,19 @@ ghost = {
 headOn.loadImages([{name:"red_ghost", src:"img/red_ghost.png"},{name:"pink_ghost", src:"img/pink_ghost.png"},{name:"orange_ghost", src:"img/orange_ghost.png"}, {name:"frightend", src:"img/frightend.png"}]);
 
 pac_man = {
-	x: 184,
-	y: 376,
-	tilex: 0,
-	tiley: 0,
+	x: 96,
+	y: 64*5,
+	tilex: 4,
+	tiley: 1,
 	speed:50,
 	//up: 0 left:1 down: 2 right:3
 	direction: 2,
+	init: function(x, y){
+		this.tilex = x;
+		this.tiley = y;
+		this.x = x * tileScale * 8 + tileScale * 4;
+		this.y = y * tileScale * 8 + tileScale * 4;
+	}
 
 };
 gamestate = {
@@ -179,10 +186,10 @@ headOn.render(function(){
 	for(i=0;i<map[0].length;i++){
 		for(j=0;j<map.length;j++){
 			if(map[j][i]===0){
-				canvas.drawRect(16,16, i*16, j*16, "black", {color:"blue", width:1});
+				canvas.drawRect(8*tileScale,8*tileScale, i*8*tileScale, j*8*tileScale, "black", {color:"blue", width:1});
 			}
 			else{
-				canvas.drawRect(16,16, i*16, j*16, "blue", {color:"black", width:1});
+				canvas.drawRect(8*tileScale,8*tileScale, i*8*tileScale, j*8*tileScale, "blue", {color:"black", width:1});
 			}
 		}
 	}
@@ -190,10 +197,10 @@ headOn.render(function(){
 		for(j=0;j<dots.length;j++){
 			if(dots[j][i]){
 				if(dots[j][i] === 1){
-					canvas.drawCircle(i*16 + 8, j*16 + 8, 1, "yellow");
+					canvas.drawCircle(i*8*tileScale + 4*tileScale, j*8*tileScale + 4*tileScale, 1, "yellow");
 				}
 				else{
-					canvas.drawCircle(i*16 + 8, j*16 + 8, 2.5,"yellow");
+					canvas.drawCircle(i*8*tileScale + 4*tileScale, j*8*tileScale + 4*tileScale, 2.5,"yellow");
 				}
 			}
 		}
@@ -201,8 +208,9 @@ headOn.render(function(){
 	canvas.drawImage( red_ghost.image(), red_ghost.x - (17/2), red_ghost.y - (17/2));
 	canvas.drawImage( pink_ghost.image(), pink_ghost.x - (17/2), pink_ghost.y - (17/2));
 	canvas.drawImage( orange_ghost.image(), orange_ghost.x - (17/2), orange_ghost.y - (17/2));
-	canvas.drawRect(16,16, pac_man.x - (16/2), pac_man.y - (16/2), "yellow");
+	canvas.drawRect(tileScale*8,tileScale*8, pac_man.x - (4*tileScale), pac_man.y - (4*tileScale), "yellow");
 })
+pac_man.init(1, 4);
 headOn.run();
 function movePacMan(delta){
 	var tile = getTile(pac_man.x, pac_man.y);
