@@ -139,7 +139,18 @@ ghost = {
 		}
 	},ghost);
 	
-headOn.loadImages([{name:"red_ghost", src:"img/red_ghost.png"},{name:"pink_ghost", src:"img/pink_ghost.png"},{name:"orange_ghost", src:"img/orange_ghost.png"}, {name:"frightend", src:"img/frightend.png"}]);
+headOn.loadImages(
+	[
+		{name:"red_ghost", src:"img/red_ghost.png"},
+		{name:"pink_ghost", src:"img/pink_ghost.png"},
+		{name:"orange_ghost", src:"img/orange_ghost.png"}, 
+		{name:"frightend", src:"img/frightend.png"}, 
+		{name:"bg", src:"img/bg.png"}
+	]
+, false, function(){
+	init();
+	headOn.run();
+});
 
 pac_man = {
 	x: 184,
@@ -194,11 +205,9 @@ headOn.render(function(){
 	canvas.drawImage( pink_ghost.image(), pink_ghost.x - (17/2), pink_ghost.y - (17/2));
 	canvas.drawImage( orange_ghost.image(), orange_ghost.x - (17/2), orange_ghost.y - (17/2));
 	canvas.drawRect(16,16, pac_man.x - (16/2), pac_man.y - (16/2), "yellow");
-	var ptile = getTile(pac_man.x, pac_man.y);
-	canvas.drawRect(16,16, ptile.x*16, ptile.y*16, "green");
+	
 });
-init();
-headOn.run();
+
 function movePacMan(delta){
 	var tile = getTile(pac_man.x, pac_man.y);
 	var next_tile;
@@ -600,16 +609,19 @@ function frightend(){
 	},8*1000)
 }
 function drawMap(){
-	for(i=0;i<map[0].length;i++){
-		for(j=0;j<map.length;j++){
-			if(map[j][i]===0){
-				headOn.canvas("map").drawRect(16,16, i*16, j*16, "black", {color:"blue", width:1});
-			}
-			else{
-				headOn.canvas("map").drawRect(16,16, i*16, j*16, "blue", {color:"black", width:1});
-			}
-		}
-	}
+	headOn.canvas("map").drawRect(20,20, 0,0, "black");
+	console.log(headOn.images("bg"))
+	headOn.canvas("map").drawImage(headOn.images("bg"), 0,0);
+	// for(i=0;i<map[0].length;i++){
+	// 	for(j=0;j<map.length;j++){
+	// 		if(map[j][i]===0){
+	// 			headOn.canvas("map").drawRect(16,16, i*16, j*16, "black");
+	// 		}
+	// 		else{
+	// 			headOn.canvas("map").drawRect(16,16, i*16, j*16, "blue");
+	// 		}
+	// 	}
+	// }
 }
 function init(){
 	drawMap();
