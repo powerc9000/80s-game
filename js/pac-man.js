@@ -1,8 +1,9 @@
 var camera = new headOn.Camera(224*2, 288*2);
 headOn.canvas.create("main",224*2,288*2, camera);
-
+headOn.canvas.create("map", 224*2, 288*2, camera);
 var pac_man, grid, red_ghost, blue_ghost, pink_ghost, yellow_ghost, ghost, canvas = headOn.canvas("main");
 canvas.append("body");
+
 
 //types of tiles
 //0 un accesable
@@ -176,16 +177,7 @@ headOn.update(function(delta){
 
 });
 headOn.render(function(){
-	for(i=0;i<map[0].length;i++){
-		for(j=0;j<map.length;j++){
-			if(map[j][i]===0){
-				canvas.drawRect(16,16, i*16, j*16, "black", {color:"blue", width:1});
-			}
-			else{
-				canvas.drawRect(16,16, i*16, j*16, "blue", {color:"black", width:1});
-			}
-		}
-	}
+	canvas.canvas.ctx.drawImage(headOn.canvas("map").canvas.canvas, 0,0);
 	for(i=0; i<dots[0].length;i++){
 		for(j=0;j<dots.length;j++){
 			if(dots[j][i]){
@@ -202,7 +194,10 @@ headOn.render(function(){
 	canvas.drawImage( pink_ghost.image(), pink_ghost.x - (17/2), pink_ghost.y - (17/2));
 	canvas.drawImage( orange_ghost.image(), orange_ghost.x - (17/2), orange_ghost.y - (17/2));
 	canvas.drawRect(16,16, pac_man.x - (16/2), pac_man.y - (16/2), "yellow");
-})
+	var ptile = getTile(pac_man.x, pac_man.y);
+	canvas.drawRect(16,16, ptile.x*16, ptile.y*16, "green");
+});
+init();
 headOn.run();
 function movePacMan(delta){
 	var tile = getTile(pac_man.x, pac_man.y);
@@ -604,7 +599,19 @@ function frightend(){
 		orange_ghost.frightend = false;
 	},8*1000)
 }
+function drawMap(){
+	for(i=0;i<map[0].length;i++){
+		for(j=0;j<map.length;j++){
+			if(map[j][i]===0){
+				headOn.canvas("map").drawRect(16,16, i*16, j*16, "black", {color:"blue", width:1});
+			}
+			else{
+				headOn.canvas("map").drawRect(16,16, i*16, j*16, "blue", {color:"black", width:1});
+			}
+		}
+	}
+}
 function init(){
-
+	drawMap();
 	
 }
